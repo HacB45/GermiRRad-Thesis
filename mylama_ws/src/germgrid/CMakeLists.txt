@@ -8,14 +8,15 @@ project(germgrid)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  eigen_conversions
-  roscpp
-  geometry_msgs
-  iris_lama
+	eigen_conversions
+	roscpp
+	geometry_msgs
+  	iris_lama
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+# find_package(Eigen3 REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -106,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES germgrid
-#  CATKIN_DEPENDS iris_lama iris_lama_ros/
+#  CATKIN_DEPENDS iris_lama iris_lama_ros
 #  DEPENDS system_lib
 )
 
@@ -135,6 +136,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(germgrid src/germgrid.cpp)
+add_executable(goalPose_pub src/goalPose_pub.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,7 +150,10 @@ add_executable(germgrid src/germgrid.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(germgrid
-  ${catkin_LIBRARIES}
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(goalPose_pub
+   ${catkin_LIBRARIES}
 )
 
 #############
