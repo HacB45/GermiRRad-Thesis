@@ -10,14 +10,25 @@ lama::SimpleOccupancyMap *map1;
 
 void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 {
-  ROS_INFO("I heard: [%f]", msg->pose.pose.position.x);
+  ROS_INFO("Position of the Robot : [%f , %f]", msg->pose.pose.position.x,msg->pose.pose.position.y);
   map1->setFree(Eigen::Vector3d(msg->pose.pose.position.x, msg->pose.pose.position.y, 0.0));
 }
 
+
+/**
+ * @brief Creates a representative map of the coordenates already covered by the robot
+ * 
+ * @param msg 
+ */
 void mapCallback(const nav_msgs::OccupancyGrid& msg)
 {
   ROS_INFO("I heard: [%f]",msg.header.stamp.toSec());
-  
+  ROS_INFO("Width: [%u] , Height: [%u], Resolution: [%f]",msg.info.width,msg.info.height,msg.info.resolution);
+  ROS_INFO("x: [%f] , y: [%f], z: [%f]",msg.info.origin.position.x,msg.info.origin.position.y,msg.info.origin.position.z);
+
+  msg.data[];
+
+
   unsigned int width = msg.info.width;
   unsigned int height= msg.info.height;
 
