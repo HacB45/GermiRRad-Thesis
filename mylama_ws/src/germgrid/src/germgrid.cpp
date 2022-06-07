@@ -6,10 +6,59 @@
 #include "lama/types.h"
 #include "lama/sdm/map.h"
 #include "lama/pose2d.h"
+#include "lama/image.h"
 #include <tf/tf.h>
 #include <math.h>
 
-lama::SimpleOccupancyMap *map1;
+lama::SimpleOccupancyMap *map1 = nullptr;
+ros::Publisher map_publisher;
+
+
+bool OccupancyMsgFromOccupancyMap(nav_msgs::OccupancyGrid& msg)
+{
+    Eigen::Vector3ui imin, imax;
+    map1->bounds(imin, imax);
+
+    unsigned int width = imax(0) - imin(0);
+    unsigned int height= imax(1) - imin(1);
+
+    if (width == 0 || height == 0)
+        return false;
+
+    if ( width*height != msg.data.size() )
+        msg.data.resize(width*height);
+
+    lama::Image image;
+    image.alloc(width, height, 1);
+    image.fill(50);
+
+    lama::SimpleOccupancyMap map2(*map1);
+    map1->visit_all_cells([&image, &map2, &imin](const Eigen::Vector3ui& coords){
+        Eigen::Vector3ui adj_coords = coords - imin;
+
+        if (map1->isFree(coords))
+            image(adj_coords(0), adj_coords(1)) = 0;
+        else if (map1->isOccupied(coords))
+            image(adj_coords(0), adj_coords(1)) = 100;
+        else
+            image(adj_coords(0), adj_coords(1)) = 0xff;
+    });
+
+    memcpy(&msg.data[0], image.data.get(), width*height);
+
+    msg.info.width = width;
+    msg.info.height = height;
+    msg.info.resolution = map1->resolution;
+
+    Eigen::Vector3d pos = map1->m2w(imin);
+    msg.info.origin.position.x = pos.x();
+    msg.info.origin.position.y = pos.y();
+    msg.info.origin.position.z = 0;
+    msg.info.origin.orientation = tf::createQuaternionMsgFromYaw(0);
+
+    return true;
+}
+
 
 /**
  * @brief Compute all the coords on a straight line between two points until it reaches one coord that 
@@ -52,7 +101,6 @@ void computeIrradiatedRay(const Eigen::Vector3ui& from, const Eigen::Vector3ui& 
     }       
     else
     {
-      
       // save the coordinate
       sink.push_back(coord.cast<uint32_t>());
     }
@@ -72,14 +120,17 @@ void computeIrradiatedRay(const Eigen::Vector3ui& from, const Eigen::Vector3ui& 
  */
 void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 {
+  if (map1 == nullptr) return;
+  
   Eigen::VectorVector3ui fan_pos, occ_poses;
-  Eigen::Vector2d point0, point1; 
-  Eigen::Vector2d sensorPos;
+  Eigen::Vector2d point0, point1, point2; 
   double openAngle = M_PI/2;
   double dirAngle = 0;
-  double rangeUV = 2; 
+  double rangeUV = 10; 
   double uvAngleRightLimit, uvAngleLeftLimit;
-  
+
+  // Position of the sensor UV
+  lama::Pose2D poseSensorUV(0.0 , 0.0 , 0.0);
   // Considered that it will be at the center of the robot
   lama::Pose2D poseRobot(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
 
@@ -88,71 +139,30 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 
   ROS_INFO("x -> [%f] , y -> [%f]",msg->pose.pose.position.x,msg->pose.pose.position.y);
 
-  // // Point of the left range of the UV light
-  // if (uvAngleLeftLimit >= (2*M_PI))
-  // {
-  //   uvAngleLeftLimit = uvAngleLeftLimit - (2*M_PI); 
-  //   //QUADRANT IV
-  //   point0 = poseRobot * Eigen::Vector2d(cos(uvAngleLeftLimit*rangeUV), -sin(uvAngleLeftLimit*rangeUV),);
-  // }
-  // else if ((dirAngle >= ((2*M_PI)/3)) && (dirAngle < (2*M_PI)))
-  // {
-  //   //QUADRANT IV
-  //   point0 = poseRobot * Eigen::Vector2d(cos(uvAngleLeftLimit*rangeUV), -sin(uvAngleLeftLimit*rangeUV));
-  // }
-  // else if ((dirAngle >= M_PI) && (dirAngle < (2*M_PI)/3))
-  // {
-  //   //QUADRANT III
-  //   point0 = poseRobot * Eigen::Vector2d(-cos(uvAngleLeftLimit*rangeUV), -sin(uvAngleLeftLimit*rangeUV));
-  // }
-  // else if ((uvAngleLeftLimit >= M_PI/2) && (uvAngleLeftLimit < M_PI))
-  // {
-     //QUADRANT II
-     //ROS_INFO("LEFT ANGEL -> x: [%f] , y: [%f]",cos(-uvAngleLeftLimit),sin(uvAngleLeftLimit));
-    point0 = poseRobot * Eigen::Vector2d(cos(-uvAngleLeftLimit)*rangeUV, sin(uvAngleLeftLimit)*rangeUV);
-  // }
-  // else 
-  // {
-  //  // QUADRANT I
-    // point0 = poseRobot * Eigen::Vector2d(cos(uvAngleLeftLimit*rangeUV), sin(uvAngleLeftLimit*rangeUV));
-  // }  
+  // Point of the left range of the UV light
+  point0 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleLeftLimit)*rangeUV, sin(uvAngleLeftLimit)*rangeUV));
 
-  
-  // // Point of the right range of the UV light
-  // if (uvAngleRightLimit < 0)
-  // {
-    // uvAngleRightLimit = (2*M_PI) + uvAngleRightLimit;
-    //QUADRANT I
-    point1 = poseRobot * Eigen::Vector2d(cos(uvAngleRightLimit)*rangeUV, sin(uvAngleRightLimit)*rangeUV);  
+  point2 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(dirAngle)*rangeUV, sin(dirAngle)*rangeUV));
 
-  // }
-  // else if ((dirAngle >= 0) && (dirAngle < M_PI/2))
-  // {
-  //   //QUADRANT I
-  //   point1 = poseRobot * Eigen::Vector2d(cos(uvAngleRightLimit*rangeUV), sin(uvAngleRightLimit*rangeUV));  
-  // }
-  // else if ((dirAngle >= M_PI/2) && (dirAngle < M_PI))
-  // {
-  //   //QUADRANT II
-  //   point1 = poseRobot * Eigen::Vector2d(-cos(uvAngleRightLimit*rangeUV), sin(uvAngleRightLimit*rangeUV));  
-  // }
-  // else if ((dirAngle >= M_PI) && (dirAngle < ((2*M_PI)/3)))
-  // {
-  //   //QUADRANT III
-  //   point1 = poseRobot * Eigen::Vector2d(-cos(uvAngleRightLimit*rangeUV), -sin(uvAngleRightLimit*rangeUV));  
-  // }
-  // else
-  // {
-  //   //QUADRANT IV
-  //   point1 = poseRobot * Eigen::Vector2d(cos(uvAngleRightLimit*rangeUV), -sin(uvAngleRightLimit*rangeUV));  
-  // }  
-
-  // ROS_INFO("Point 0 -> x: [%f] , y: [%f]",point0(0),point0(1));
-  // ROS_INFO("Point 1 -> x: [%f] , y: [%f]",point1(0),point1(1));
-  
+  // Point of the right range of the UV light
+  point1 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleRightLimit)*rangeUV, sin(uvAngleRightLimit)*rangeUV));  
+ 
   // Compute the points that represent the limit of the irradiantion light
-  map1->computeRay(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)), map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)), fan_pos);
+  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)));
+  // map1->computeRay(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)), map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)), fan_pos);
+  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
+  // map1->computeRay(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)), map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)), fan_pos);
+  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)));
 
+
+  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)));
+
+  // Este metodo tem sempre em conta as coords laterais e "pinta-as" enquanto que o anterior permite que estas coords estejam
+  // na diagonal. 
+  map1->computeRay(Eigen::Vector3d(point0(0), point0(1), 0.0), Eigen::Vector3d(point2(0), point2(1), 0.0), fan_pos);
+  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
+  map1->computeRay(Eigen::Vector3d(point2(0), point2(1), 0.0), Eigen::Vector3d(point1(0), point1(1), 0.0), fan_pos);
+  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)));
 
   // Compute all the points that represent the area irradianted
   const size_t num_fan_pos = fan_pos.size();
@@ -166,6 +176,10 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
       map1->setFree(occ_poses[i]);
   }
 
+  nav_msgs::OccupancyGrid msg_map;
+  OccupancyMsgFromOccupancyMap(msg_map);
+  map_publisher.publish(msg_map);
+
 }
 
 
@@ -176,10 +190,9 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
  */
 void mapCallback(const nav_msgs::OccupancyGrid& msg)
 {
-  // ROS_INFO("I heard: [%f]",msg.header.stamp.toSec());
-  // ROS_INFO("Width: [%u] , Height: [%u], Resolution: [%f]",msg.info.width,msg.info.height,msg.info.resolution);
-  // ROS_INFO("x: [%f] , y: [%f], z: [%f]",msg.info.origin.position.x,msg.info.origin.position.y,msg.info.origin.position.z);
-
+  map1  = new lama::SimpleOccupancyMap(0.05);
+  
+  ROS_INFO("I heard: [%f]",msg.header.stamp.toSec());
 
   unsigned int width = msg.info.width;
   unsigned int height= msg.info.height;
@@ -202,17 +215,16 @@ void mapCallback(const nav_msgs::OccupancyGrid& msg)
 
 
 
-
 int main(int argc, char **argv)
 {
 
   ros::init(argc, argv, "germgrid");
   ros::NodeHandle n;
-
-  map1  = new lama::SimpleOccupancyMap(0.05);
-
-  ros::Subscriber subPose = n.subscribe("/amcl_pose", 1000, poseCallback);
+  
   ros::Subscriber subMap = n.subscribe("/map", 1000, mapCallback);
+  ros::Subscriber subPose = n.subscribe("/amcl_pose", 1000, poseCallback);
+
+  map_publisher = n.advertise<nav_msgs::OccupancyGrid>("/map_irradiated", 10, true);
 
   ros::spin();
 
