@@ -1,0 +1,6 @@
+<launch>
+    <group ns="sensorUV_specs">
+        <rosparam command="load" file="$(find germgrid)/config/sensorUV.yaml" />    
+    </group>
+    <node pkg="germgrid" type="germgrid" name="irradiation_map"/>
+</launch>
