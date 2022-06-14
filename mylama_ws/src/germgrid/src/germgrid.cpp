@@ -12,7 +12,7 @@
 
 lama::SimpleOccupancyMap *map1 = nullptr;
 ros::Publisher map_publisher;
-
+double openAngle, dirAngle, rangeUV;
 
 bool OccupancyMsgFromOccupancyMap(nav_msgs::OccupancyGrid& msg)
 {
@@ -124,9 +124,6 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   
   Eigen::VectorVector3ui fan_pos, occ_poses;
   Eigen::Vector2d point0, point1, point2; 
-  double openAngle = M_PI/2;
-  double dirAngle = 0;
-  double rangeUV = 10; 
   double uvAngleRightLimit, uvAngleLeftLimit;
 
   // Position of the sensor UV
@@ -137,32 +134,17 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   uvAngleLeftLimit = dirAngle + (openAngle/2.0);
   uvAngleRightLimit = dirAngle - (openAngle/2.0);
 
-  ROS_INFO("x -> [%f] , y -> [%f]",msg->pose.pose.position.x,msg->pose.pose.position.y);
-
-  // Point of the left range of the UV light
+  // Points of the range of the UV light
   point0 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleLeftLimit)*rangeUV, sin(uvAngleLeftLimit)*rangeUV));
-
-  point2 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(dirAngle)*rangeUV, sin(dirAngle)*rangeUV));
-
-  // Point of the right range of the UV light
-  point1 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleRightLimit)*rangeUV, sin(uvAngleRightLimit)*rangeUV));  
- 
-  // Compute the points that represent the limit of the irradiantion light
-  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)));
-  // map1->computeRay(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)), map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)), fan_pos);
-  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
-  // map1->computeRay(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)), map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)), fan_pos);
-  // fan_pos.push_back(map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)));
+  point1 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(dirAngle)*rangeUV, sin(dirAngle)*rangeUV));  
+  point2 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleRightLimit)*rangeUV, sin(uvAngleRightLimit)*rangeUV));
 
 
   fan_pos.push_back(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)));
-
-  // Este metodo tem sempre em conta as coords laterais e "pinta-as" enquanto que o anterior permite que estas coords estejam
-  // na diagonal. 
-  map1->computeRay(Eigen::Vector3d(point0(0), point0(1), 0.0), Eigen::Vector3d(point2(0), point2(1), 0.0), fan_pos);
-  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
-  map1->computeRay(Eigen::Vector3d(point2(0), point2(1), 0.0), Eigen::Vector3d(point1(0), point1(1), 0.0), fan_pos);
+  map1->computeRay(Eigen::Vector3d(point0(0), point0(1), 0.0), Eigen::Vector3d(point1(0), point1(1), 0.0), fan_pos); // Este metodo tem sempre em conta as coords laterais e "pinta-as" enquanto que o anterior permite que estas coords estejam na diagonal.
   fan_pos.push_back(map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)));
+  map1->computeRay(Eigen::Vector3d(point1(0), point1(1), 0.0), Eigen::Vector3d(point2(0), point2(1), 0.0), fan_pos);
+  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
 
   // Compute all the points that represent the area irradianted
   const size_t num_fan_pos = fan_pos.size();
@@ -220,7 +202,16 @@ int main(int argc, char **argv)
 
   ros::init(argc, argv, "germgrid");
   ros::NodeHandle n;
-  
+  double openAngleDeg, dirAngleDeg;
+
+  n.getParam("/sensorUV_specs/openAngle", openAngleDeg);
+  n.getParam("/sensorUV_specs/dirAngle", dirAngleDeg);
+  n.getParam("/sensorUV_specs/rangeUV", rangeUV);
+
+  // Transform degrees to rad
+  openAngle = (M_PI*openAngleDeg)/180;
+  dirAngle = (M_PI*dirAngleDeg)/180;
+
   ros::Subscriber subMap = n.subscribe("/map", 1000, mapCallback);
   ros::Subscriber subPose = n.subscribe("/amcl_pose", 1000, poseCallback);
 
