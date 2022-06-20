@@ -123,28 +123,40 @@ void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   if (map1 == nullptr) return;
   
   Eigen::VectorVector3ui fan_pos, occ_poses;
-  Eigen::Vector2d point0, point1, point2; 
-  double uvAngleRightLimit, uvAngleLeftLimit;
+  Eigen::VectorVector2d fanLimitPoints; 
+  int num_fanLimitPoints = 7;
 
   // Position of the sensor UV
   lama::Pose2D poseSensorUV(0.0 , 0.0 , 0.0);
   // Considered that it will be at the center of the robot
   lama::Pose2D poseRobot(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
 
-  uvAngleLeftLimit = dirAngle + (openAngle/2.0);
-  uvAngleRightLimit = dirAngle - (openAngle/2.0);
+  double Ang1, Ang2, Ang3, Ang4, Ang5, Ang6;
+  Ang1 = dirAngle + (openAngle/6.0);
+  Ang2 = dirAngle + (2*openAngle/6.0);
+  Ang3 = dirAngle + (openAngle/2.0);
+  Ang4 = dirAngle - (openAngle/6.0);
+  Ang5 = dirAngle - (2*openAngle/6.0);
+  Ang6 = dirAngle - (openAngle/2.0);
 
   // Points of the range of the UV light
-  point0 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleLeftLimit)*rangeUV, sin(uvAngleLeftLimit)*rangeUV));
-  point1 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(dirAngle)*rangeUV, sin(dirAngle)*rangeUV));  
-  point2 = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(uvAngleRightLimit)*rangeUV, sin(uvAngleRightLimit)*rangeUV));
+  fanLimitPoints[0] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang1)*rangeUV, sin(Ang1)*rangeUV));
+  fanLimitPoints[1] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang2)*rangeUV, sin(Ang2)*rangeUV));
+  fanLimitPoints[2] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang3)*rangeUV, sin(Ang3)*rangeUV));
+  fanLimitPoints[3] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(dirAngle)*rangeUV, sin(dirAngle)*rangeUV));  
+  fanLimitPoints[4] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang4)*rangeUV, sin(Ang4)*rangeUV));
+  fanLimitPoints[5] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang5)*rangeUV, sin(Ang5)*rangeUV));
+  fanLimitPoints[6] = poseRobot * (poseSensorUV * Eigen::Vector2d(cos(Ang6)*rangeUV, sin(Ang6)*rangeUV));
 
-
-  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point0(0), point0(1), 0.0)));
-  map1->computeRay(Eigen::Vector3d(point0(0), point0(1), 0.0), Eigen::Vector3d(point1(0), point1(1), 0.0), fan_pos); // Este metodo tem sempre em conta as coords laterais e "pinta-as" enquanto que o anterior permite que estas coords estejam na diagonal.
-  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point1(0), point1(1), 0.0)));
-  map1->computeRay(Eigen::Vector3d(point1(0), point1(1), 0.0), Eigen::Vector3d(point2(0), point2(1), 0.0), fan_pos);
-  fan_pos.push_back(map1->w2m(Eigen::Vector3d(point2(0), point2(1), 0.0)));
+  Eigen::Vector2d from_point, to_point;
+  for (size_t i = 0; i < (num_fanLimitPoints-1); ++i){
+    from_point = fanLimitPoints[i];
+    to_point = fanLimitPoints[i+1];
+    fan_pos.push_back(map1->w2m(Eigen::Vector3d(from_point(0), from_point(1), 0.0)));
+    // Este metodo tem sempre em conta as coords laterais e "pinta-as" enquanto que o anterior permite que estas coords estejam na diagonal.
+    map1->computeRay(Eigen::Vector3d(from_point(0), from_point(1), 0.0), Eigen::Vector3d(to_point(0), to_point(1), 0.0), fan_pos);  
+  }
+  fan_pos.push_back(map1->w2m(Eigen::Vector3d(to_point(0), to_point(1), 0.0)));
 
   // Compute all the points that represent the area irradianted
   const size_t num_fan_pos = fan_pos.size();
