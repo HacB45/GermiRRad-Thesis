@@ -11,27 +11,19 @@ int main(int argc, char **argv)
   ros::Publisher goalPose_pub = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 
   ros::Rate loop_rate(10);
-  
-  float x_lin,y_lin,z_lin;
-  float x_ang,y_ang,z_ang;
-  std::cout << "Enter the linear x y z:\n";
-  std::cin >> x_lin >> y_lin >> z_lin;
-  std::cout << "Enter the angular x y z:\n";
-  std::cin >> x_ang >> y_ang >> z_ang;
-  
+   
   while (ros::ok())
   {
     geometry_msgs::Twist msg;
+    double linVelx, angVelz;
     
-    msg.linear.x = x_lin;
-    msg.linear.y = y_lin;
-    msg.linear.z = z_lin;
-    msg.angular.z = x_ang;
-    msg.angular.z = y_ang;
-    msg.angular.z = z_ang;
+    n.getParam("/linearVelxUpdate", linVelx);
+    n.getParam("/angularVelzUpdate", angVelz);
 
-    ROS_INFO("linear : [x:%f , y:%f , z:%f]", msg.linear.x, msg.linear.y, msg.linear.z);
-    ROS_INFO("angular : [x:%f , y:%f , z:%f]", msg.angular.x, msg.angular.y, msg.angular.z);
+    msg.linear.x = linVelx;
+    msg.angular.z = angVelz;
+
+    ROS_INFO("linear : [x:%f], angular : [z:%f]", msg.linear.x, msg.angular.z);
 
     goalPose_pub.publish(msg);
 
