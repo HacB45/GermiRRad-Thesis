@@ -1,1 +1,0 @@
-/home/hugo/Desktop/mir100/devel/.private/global_planner/include/global_planner/GlobalPlannerConfig.h

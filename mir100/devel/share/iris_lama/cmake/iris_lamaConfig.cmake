@@ -1,1 +1,0 @@
-/home/hugo/Desktop/mir100/devel/.private/iris_lama/share/iris_lama/cmake/iris_lamaConfig.cmake

@@ -1,8 +1,0 @@
-prefix=/home/hugo/Desktop/mir100/devel/.private/mir100_explore
-
-Name: mir100_explore
-Description: Description of mir100_explore
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: actionlib actionlib_msgs costmap_2d geometry_msgs map_msgs move_base_msgs nav_msgs roscpp std_msgs tf visualization_msgs

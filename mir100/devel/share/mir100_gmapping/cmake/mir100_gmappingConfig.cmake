@@ -1,1 +1,0 @@
-/home/hugo/Desktop/mir100/devel/.private/mir100_gmapping/share/mir100_gmapping/cmake/mir100_gmappingConfig.cmake

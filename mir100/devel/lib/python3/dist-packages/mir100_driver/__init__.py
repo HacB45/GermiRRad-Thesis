@@ -1,1 +1,0 @@
-/home/hugo/Desktop/mir100/devel/.private/mir100_driver/lib/python3/dist-packages/mir100_driver/__init__.py
