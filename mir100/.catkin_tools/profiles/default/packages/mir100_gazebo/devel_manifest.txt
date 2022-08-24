@@ -1,5 +1,0 @@
-mir100_gazebo
-/home/hugo/Desktop/mir100/devel/.private/mir100_gazebo/cmake.lock /home/hugo/Desktop/mir100/devel/./cmake.lock
-/home/hugo/Desktop/mir100/devel/.private/mir100_gazebo/lib/pkgconfig/mir100_gazebo.pc /home/hugo/Desktop/mir100/devel/lib/pkgconfig/mir100_gazebo.pc
-/home/hugo/Desktop/mir100/devel/.private/mir100_gazebo/share/mir100_gazebo/cmake/mir100_gazeboConfig-version.cmake /home/hugo/Desktop/mir100/devel/share/mir100_gazebo/cmake/mir100_gazeboConfig-version.cmake
-/home/hugo/Desktop/mir100/devel/.private/mir100_gazebo/share/mir100_gazebo/cmake/mir100_gazeboConfig.cmake /home/hugo/Desktop/mir100/devel/share/mir100_gazebo/cmake/mir100_gazeboConfig.cmake

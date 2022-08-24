@@ -1,1 +1,0 @@
-/home/hugo/Desktop/mir100/devel/./cmake.lock 458

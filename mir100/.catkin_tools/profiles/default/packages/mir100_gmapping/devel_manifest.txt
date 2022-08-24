@@ -1,5 +1,0 @@
-mir100_gmapping
-/home/hugo/Desktop/mir100/devel/.private/mir100_gmapping/cmake.lock /home/hugo/Desktop/mir100/devel/./cmake.lock
-/home/hugo/Desktop/mir100/devel/.private/mir100_gmapping/lib/pkgconfig/mir100_gmapping.pc /home/hugo/Desktop/mir100/devel/lib/pkgconfig/mir100_gmapping.pc
-/home/hugo/Desktop/mir100/devel/.private/mir100_gmapping/share/mir100_gmapping/cmake/mir100_gmappingConfig.cmake /home/hugo/Desktop/mir100/devel/share/mir100_gmapping/cmake/mir100_gmappingConfig.cmake
-/home/hugo/Desktop/mir100/devel/.private/mir100_gmapping/share/mir100_gmapping/cmake/mir100_gmappingConfig-version.cmake /home/hugo/Desktop/mir100/devel/share/mir100_gmapping/cmake/mir100_gmappingConfig-version.cmake

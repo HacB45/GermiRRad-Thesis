@@ -1,6 +1,0 @@
-mir100_explore
-/home/hugo/Desktop/mir100/devel/.private/mir100_explore/cmake.lock /home/hugo/Desktop/mir100/devel/./cmake.lock
-/home/hugo/Desktop/mir100/devel/.private/mir100_explore/lib/mir100_explore/explore /home/hugo/Desktop/mir100/devel/lib/mir100_explore/explore
-/home/hugo/Desktop/mir100/devel/.private/mir100_explore/lib/pkgconfig/mir100_explore.pc /home/hugo/Desktop/mir100/devel/lib/pkgconfig/mir100_explore.pc
-/home/hugo/Desktop/mir100/devel/.private/mir100_explore/share/mir100_explore/cmake/mir100_exploreConfig-version.cmake /home/hugo/Desktop/mir100/devel/share/mir100_explore/cmake/mir100_exploreConfig-version.cmake
-/home/hugo/Desktop/mir100/devel/.private/mir100_explore/share/mir100_explore/cmake/mir100_exploreConfig.cmake /home/hugo/Desktop/mir100/devel/share/mir100_explore/cmake/mir100_exploreConfig.cmake
