@@ -1,8 +1,0 @@
-prefix=/home/hugo/Desktop/mir100/install
-
-Name: mir100_germgrid
-Description: Description of mir100_germgrid
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
