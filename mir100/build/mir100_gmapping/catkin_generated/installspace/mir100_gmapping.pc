@@ -1,0 +1,8 @@
+prefix=/home/hugo/Desktop/mir100/install
+
+Name: mir100_gmapping
+Description: Description of mir100_gmapping
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

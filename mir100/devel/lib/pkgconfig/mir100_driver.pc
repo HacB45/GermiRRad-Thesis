@@ -1,0 +1,1 @@
+/home/hugo/Desktop/mir100/devel/.private/mir100_driver/lib/pkgconfig/mir100_driver.pc

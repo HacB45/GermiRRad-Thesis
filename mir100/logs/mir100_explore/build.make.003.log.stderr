@@ -1,0 +1,10 @@
+/usr/bin/ld: CMakeFiles/explore.dir/src/frontier_search.cpp.o: in function `frontier_exploration::nhood4(unsigned int, costmap_2d::Costmap2D const&)':
+frontier_search.cpp:(.text+0x1f): multiple definition of `frontier_exploration::nhood4(unsigned int, costmap_2d::Costmap2D const&)'; CMakeFiles/explore.dir/src/explore.cpp.o:explore.cpp:(.text+0x1f): first defined here
+/usr/bin/ld: CMakeFiles/explore.dir/src/frontier_search.cpp.o: in function `frontier_exploration::nhood8(unsigned int, costmap_2d::Costmap2D const&)':
+frontier_search.cpp:(.text+0x2aa): multiple definition of `frontier_exploration::nhood8(unsigned int, costmap_2d::Costmap2D const&)'; CMakeFiles/explore.dir/src/explore.cpp.o:explore.cpp:(.text+0x2aa): first defined here
+/usr/bin/ld: CMakeFiles/explore.dir/src/frontier_search.cpp.o: in function `frontier_exploration::nearestCell(unsigned int&, unsigned int, unsigned char, costmap_2d::Costmap2D const&)':
+frontier_search.cpp:(.text+0x454): multiple definition of `frontier_exploration::nearestCell(unsigned int&, unsigned int, unsigned char, costmap_2d::Costmap2D const&)'; CMakeFiles/explore.dir/src/explore.cpp.o:explore.cpp:(.text+0x454): first defined here
+collect2: error: ld returned 1 exit status
+make[2]: *** [CMakeFiles/explore.dir/build.make:149: /home/hugo/Desktop/mir100/devel/.private/mir100_explore/lib/mir100_explore/explore] Error 1
+make[1]: *** [CMakeFiles/Makefile2:357: CMakeFiles/explore.dir/all] Error 2
+make: *** [Makefile:141: all] Error 2

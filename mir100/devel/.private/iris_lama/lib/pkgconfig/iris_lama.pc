@@ -1,0 +1,8 @@
+prefix=/home/hugo/Desktop/mir100/devel/.private/iris_lama
+
+Name: iris_lama
+Description: Description of iris_lama
+Version: 1.2.0
+Cflags: -I/home/hugo/Desktop/mir100/src/iris_lama/include
+Libs: -L${prefix}/lib -liris_lama
+Requires: 

@@ -1,0 +1,6 @@
+mir100_dwb_critics
+/home/hugo/Desktop/mir100/devel/.private/mir100_dwb_critics/cmake.lock /home/hugo/Desktop/mir100/devel/./cmake.lock
+/home/hugo/Desktop/mir100/devel/.private/mir100_dwb_critics/lib/libmir100_dwb_critics.so /home/hugo/Desktop/mir100/devel/lib/libmir100_dwb_critics.so
+/home/hugo/Desktop/mir100/devel/.private/mir100_dwb_critics/lib/pkgconfig/mir100_dwb_critics.pc /home/hugo/Desktop/mir100/devel/lib/pkgconfig/mir100_dwb_critics.pc
+/home/hugo/Desktop/mir100/devel/.private/mir100_dwb_critics/share/mir100_dwb_critics/cmake/mir100_dwb_criticsConfig-version.cmake /home/hugo/Desktop/mir100/devel/share/mir100_dwb_critics/cmake/mir100_dwb_criticsConfig-version.cmake
+/home/hugo/Desktop/mir100/devel/.private/mir100_dwb_critics/share/mir100_dwb_critics/cmake/mir100_dwb_criticsConfig.cmake /home/hugo/Desktop/mir100/devel/share/mir100_dwb_critics/cmake/mir100_dwb_criticsConfig.cmake
