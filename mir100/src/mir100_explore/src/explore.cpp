@@ -160,7 +160,7 @@ void Explore::visualizeFrontiers(
     ++id;
     m.type = visualization_msgs::Marker::SPHERE;
     m.id = int(id);
-    m.pose.position = frontier.initial;
+    m.pose.position = frontier.centroid;
     // scale frontier according to its cost (costier frontiers will be smaller)
     double scale = std::min(std::abs(min_cost * 0.4 / frontier.cost), 0.5);
     m.scale.x = scale;
@@ -204,33 +204,18 @@ void Explore::makePlan()
     visualizeFrontiers(frontiers);
   }
 
-  // // find non blacklisted frontier
-  // auto frontier = std::find_if_not(frontiers.begin(), frontiers.end(),
 
-  //                                  [this](const frontier_exploration::Frontier &f)
-  //                                  {
-  //                                    return goalOnBlacklist(f.centroid);
-  //                                  });
-
-  // if (frontier == frontiers.end()) {
-  //   stop();
-  //   return;
-  // }
-
-
-  
-    
-  frontier_exploration::Frontier frontier;
-  double fminDist = 0;
-  size_t i;
-  for (i = 0; i < frontiers.size(); ++i) {
-    if (fminDist >= frontiers[i].min_distance ) {
-      fminDist = frontiers[i].min_distance;
-      frontier = frontiers[i];
-    }
+  std::vector<frontier_exploration::Frontier>::iterator frontier;
+  double fminDist = begin(frontiers)->min_distance;
+  for (auto f = begin(frontiers); f != end(frontiers); ++f)
+  {
+     if (fminDist <= f->min_distance)
+     {
+      fminDist = f->min_distance;
+      frontier = f;
+     }          
   }
-  ROS_INFO("CENTROID -> x : %f | y : %f",frontier.centroid.x,frontier.centroid.y);
-  // // ROS_INFO("frontier %zd choosen", i);
+  ROS_INFO("CENTROID -> x : %f | y : %f",frontier->centroid.x,frontier->centroid.y);
   
   
   ROS_INFO("CALCULATING THE GOAL...");
@@ -239,7 +224,7 @@ void Explore::makePlan()
    
   // frontier centroid coords on map
   unsigned int fcentroid_mx, fcentroid_my;
-  costmap->worldToMap(frontier.centroid.x, frontier.centroid.y, fcentroid_mx, fcentroid_my);
+  costmap->worldToMap(frontier->centroid.x, frontier->centroid.y, fcentroid_mx, fcentroid_my);
   // Index on the associated map coords of frontier centroid
   unsigned int fcentroidobst, fcentroidpose = costmap->getIndex(fcentroid_mx,fcentroid_my);
   frontier_exploration::nearestCell(fcentroidobst, fcentroidpose, costmap_2d::LETHAL_OBSTACLE, *costmap);
@@ -249,11 +234,11 @@ void Explore::makePlan()
   // World coords of obstacle
   double fcentroidobst_wx, fcentroidobst_wy;
   costmap->mapToWorld(fcentroidobst_mx,fcentroidobst_my,fcentroidobst_wx,fcentroidobst_wy);
-   ROS_INFO("OBSTACLE -> x : %f | y : %f",fcentroidobst_wx,fcentroidobst_wy);
+  ROS_INFO("OBSTACLE -> x : %f | y : %f",fcentroidobst_wx,fcentroidobst_wy);
   // frontier centroid-Obstacle vector (world coords)
   geometry_msgs::Point fcentroidObstDiff;
-  fcentroidObstDiff.x = frontier.centroid.x - fcentroidobst_wx;
-  fcentroidObstDiff.y = frontier.centroid.y - fcentroidobst_wy;
+  fcentroidObstDiff.x = frontier->centroid.x - fcentroidobst_wx;
+  fcentroidObstDiff.y = frontier->centroid.y - fcentroidobst_wy;
   // frontier centroid-Obstacle distance
   double dist_fcentroidObstDiff;
   auto fcentroidobst_dx = std::abs(fcentroidObstDiff.x);
@@ -262,8 +247,8 @@ void Explore::makePlan()
   ROS_INFO("frontier centroid -OBST DISTANCE -> %f",dist_fcentroidObstDiff);
 
   geometry_msgs::Point target_position;
-  target_position.x = frontier.centroid.x + (dist_fcentroidObstDiff/2);
-  target_position.y = frontier.centroid.y + (dist_fcentroidObstDiff/2);
+  target_position.x = (frontier->centroid.x + fcentroidobst_wx)/2;
+  target_position.y = (frontier->centroid.y + fcentroidobst_wy)/2;
 
    ROS_INFO("TARGET POSITION -> x : %f | y : %f",target_position.x,target_position.y);
 
@@ -271,10 +256,10 @@ void Explore::makePlan()
   // time out if we are not making any progress
   bool same_goal = prev_goal_ == target_position;
   prev_goal_ = target_position;
-  if (!same_goal || prev_distance_ > frontier.min_distance) {
+  if (!same_goal || prev_distance_ > frontier->min_distance) {
     // we have different goal or we made some progress
     last_progress_ = ros::Time::now();
-    prev_distance_ = frontier.min_distance;
+    prev_distance_ = frontier->min_distance;
   }
   // black list if we've made no progress for a long time
   if (ros::Time::now() - last_progress_ > progress_timeout_) {
