@@ -12,7 +12,7 @@
         <wheelSeparation>${wheel_separation}</wheelSeparation>
         <wheelDiameter>${2*wheel_radius}</wheelDiameter>
         <wheelTorque>10</wheelTorque>
-        <publishTf>1</publishTf>
+        <publishTf>0</publishTf>
         <odometryFrame>map</odometryFrame>
         <commandTopic>mobile_base_controller/cmd_vel</commandTopic>
         <odometryTopic>mobile_base_controller/odom</odometryTopic>

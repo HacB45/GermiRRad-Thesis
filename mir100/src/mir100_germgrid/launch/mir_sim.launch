@@ -1,9 +1,13 @@
 <launch>
+    <arg name="map_file" default="$(find mir100_gazebo)/maps/maze.yaml" doc="Path to a map .yaml file (required)." />
+
     <include file="$(find mir100_gazebo)/launch/mir_maze_world.launch"/>
+    <!-- <include file="$(find mir100_navigation)/launch/start_maps.launch">
+        <arg name="map_file" value="$(arg map_file)" />
+    </include>
+    <include file="$(find mir100_germgrid)/launch/iris_slam2d.launch"/> -->
     
     <include file="$(find mir100_navigation)/launch/scan_matching.launch"/>
-    
-    <include file="$(find mir100_navigation)/launch/start_planner.launch"/>
-
     <include file="$(find mir100_germgrid)/launch/irradiation.launch"/>
+    <include file="$(find mir100_navigation)/launch/start_planner.launch"/> 
 </launch>

@@ -47,6 +47,7 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
+#include "lama/types.h"
 
 #include <explore/costmap_client.h>
 #include <explore/frontier_search.h>
@@ -76,7 +77,7 @@ private:
   /**
    * @brief  Publish a frontiers as markers
    */
-  void visualizeFrontiers(const std::vector<frontier_exploration::Frontier>& frontiers);
+  void visualizeFrontiers(const std::vector<frontier_exploration::Frontier>& frontiers,  const frontier_exploration::FrontierDivision& areas);
 
   void reachedGoal(const actionlib::SimpleClientGoalState& status,
                    const move_base_msgs::MoveBaseResultConstPtr& result,
@@ -84,6 +85,8 @@ private:
 
 
   bool goalOnBlacklist(const geometry_msgs::Point& goal);
+
+  void computeRay(const Eigen::Vector3d& from, const Eigen::Vector3d& to, Eigen::VectorVector3ui& sink);
 
   ros::NodeHandle private_nh_;
   ros::NodeHandle relative_nh_;

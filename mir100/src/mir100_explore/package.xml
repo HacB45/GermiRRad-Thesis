@@ -23,6 +23,8 @@
   <depend>tf</depend>
   <depend>costmap_2d</depend>
   <depend>actionlib</depend>
+  <depend>iris_lama</depend>
+  <depend>iris_lama_ros/</depend>
 
   <test_depend>roslaunch</test_depend>
 </package>

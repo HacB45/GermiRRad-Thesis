@@ -7,7 +7,7 @@ obstacle_range: 3.0
 publish_voxel_map: true
 footprint_padding: 0.0
 navigation_map:
-  map_topic: /map
+  map_topic: /map_irradiated
 obstacles:
   observation_sources: b_scan_marking b_scan_clearing f_scan_marking f_scan_clearing
   b_scan_marking:

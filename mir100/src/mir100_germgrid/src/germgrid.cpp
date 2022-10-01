@@ -249,7 +249,7 @@ int main(int argc, char **argv)
   dirAngle = (M_PI*dirAngleDeg)/180;
 
   ros::Subscriber subMap = n.subscribe("/map", 1000, mapCallback);
-  ros::Subscriber subPose = n.subscribe("/pose", 1000, poseCallback);
+  ros::Subscriber subPose = n.subscribe("pose", 1000, poseCallback);
 
   map_publisher = n.advertise<nav_msgs::OccupancyGrid>("/map_irradiated", 10, true);
 
